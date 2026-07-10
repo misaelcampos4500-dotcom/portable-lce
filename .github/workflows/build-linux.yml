@@ -72,13 +72,27 @@ jobs:
         uses: ./.github/actions/restore-cache
         with:
           ccache_dir: ~/.cache/ccache
+          
+      - name: Compile unity
+        if: ${{ matrix.build-type=='amalgam' }}
+        uses: ./.github/actions/build-meson
+        with:
+          dir_name: "build_${{ matrix.build-type }}"
+          setup_args: "-Dunity=on -Dunity_size=99999"
+
+      - name: Compile
+        if: ${{ matrix.build-type=='full' }}
+        uses: ./.github/actions/build-meson
+        with:
+          dir_name: "build_${{ matrix.build-type }}"
+          setup_args: "-Dunity=off"
 
       - name: Compile optimized
         if: ${{ matrix.build-type=='optimized' }}
         uses: ./.github/actions/build-meson
         with:
           dir_name: "build_${{ matrix.build-type }}"
-          setup_args: "-Dunity=on -Dunity_size=99999 -Dbuildtype=release -Dui_backend=java"
+          setup_args: "-Dunity=on -Dunity_size=99999 -Dbuildtype=release -Doptimization=3 -Dui_backend=java"
 
       - name: Package artifact
         run: |
